@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>WebAssembly Application</title>
+    </head>
+    <body>
+    <div id="container">
+    </div>
+    <script>
+      function isWebAssemblySupported(){
+        try{
+          if (typeof WebAssembly === "object"){
+            const module = new WebAssembly.Module(new Uint8Array([0x00,
+            0x61, 0x73, 0x6D, 0x01, 0x00, 0x00, 0x00]));
+            if (module instanceof WebAssembly.Module) {
+              const moduleInstance = new WebAssembly.Instance(module);
+              return (moduleInstance instanceof WebAssembly.Instance);
+            }
+          }
+        } catch(err){}
+      }
+
+      //isSupported test
+      console.log((isWebAssemblySupported()? "WebAssembly supported": 
+          "WebAssembly not supported"));
+      
+      //isSupported functions
+      if (typeof WebAssembly.instantiateStreaming === "function"){
+        console.log("You can use the WebAssembly.instantiateStreaming");
+      } else {
+        console.log("The WebAssembly.instantiateStreaming function isn't available.\
+        You need to use WebAssembly.instantiate insted.");
+      }
+
+
+
+      const importObject = {
+        env: {
+          __memory_base:0,
+        }};
+        // first "old" method
+        fetch("side_module.wasm").then(response=> response.arrayBuffer()).then(
+          bytes=>WebAssembly.instantiate(bytes, importObject)
+        ).then(result=>{
+          const value = result.instance.exports.Increment(25);
+          console.log(value.toString());
+        });
+
+        //second "modern" method
+        WebAssembly.instantiateStreaming(fetch("side_module.wasm")/*, importObject*/).then(
+          result => {
+            const value = result.instance.exports.Increment(17);
+            console.log(value.toString());
+          }
+        )
+    </script>
+  </body>
+</html>

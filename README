@@ -1,0 +1,8 @@
+git clone  https://github.com/juj/emsdk
+
+
+emsdk update
+emsdk install latest
+emsdk activate latest
+
+emcc .\side_module.c -o .\side_module.js -s EXPORTED_FUNCTIONS="['_Increment']"
